@@ -69,9 +69,8 @@
 
 import { Request, Response } from "express";
 import sgMail from "@sendgrid/mail";
-const SENDGRID_API_KEY =
-  "SG.rnrV7DHqQ361nZ_T2YRiYQ.mS0psKSHMCIqQBRI1WM4YsFSVbuPfgjeXrfr_IUMpe";
-sgMail.setApiKey(SENDGRID_API_KEY!);
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
 export const sendMail = async (req: Request, res: Response) => {
   try {
