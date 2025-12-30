@@ -5,18 +5,30 @@ export const sendMail = async (req: Request, res: Response) => {
   try {
     const { name, email, phone, message, formId } = req.body;
 
+    // const transporter = nodemailer.createTransport({
+    //   host: "smtp.gmail.com",
+    //   port: 587,
+    //   secure: false,
+    //   auth: {
+    //     user: process.env.MAIL_USER,
+    //     pass: process.env.MAIL_PASS,
+    //   },
+    //   tls: {
+    //     rejectUnauthorized: false,
+    //   },
+    // });
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
+      port: 465,
+      secure: true, // MUST be true for 465
       auth: {
         user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS,
+        pass: process.env.MAIL_PASS, // Gmail App Password
       },
-      tls: {
-        rejectUnauthorized: false,
-      },
+      connectionTimeout: 10000,
     });
+    await transporter.verify();
+    console.log("SMTP connected");
 
     await transporter.sendMail({
       from: `"New Inquiry" <${process.env.MAIL_USER}>`,
