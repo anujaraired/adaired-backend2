@@ -245,7 +245,9 @@ export const updateProduct = async (
 
     // Validate user input
     if (!validateInput(req, res)) return;
-
+    if (!query) {
+      throw new CustomError(400, "Query parameter is required");
+    }
     const idString = query.toString();
     const product = await fetchProduct(idString);
     if (!product) {
@@ -362,7 +364,9 @@ export const deleteProduct = async (
     if (!permissionCheck) {
       throw new CustomError(403, "Permission denied");
     }
-
+    if (!query) {
+      throw new CustomError(400, "Query parameter is required");
+    }
     const idString = query.toString();
     const product = await fetchProduct(idString);
     if (!product) {
@@ -414,7 +418,9 @@ export const duplicateProduct = async (
     if (!permissionCheck) {
       throw new CustomError(403, "Permission denied");
     }
-
+    if (!query) {
+      throw new CustomError(400, "Query parameter is required");
+    }
     const idString = query.toString();
     const product = await fetchProduct(idString);
     if (!product) {
@@ -441,20 +447,20 @@ export const duplicateProduct = async (
     };
 
     // Create the duplicated product
-    const duplicatedProduct = await Product.create(duplicatedProductData);
+    // const duplicatedProduct = await Product.create(duplicatedProductData);
 
-    await updateProductInCategories(
-      duplicatedProduct._id,
-      null,
-      null,
-      product.category,
-      subCategoryIds.length > 0 ? subCategoryIds : null
-    );
+    // await updateProductInCategories(
+    //   duplicatedProduct._id,
+    //   null,
+    //   null,
+    //   product.category,
+    //   subCategoryIds.length > 0 ? subCategoryIds : null
+    // );
 
     res.status(201).json({
       success: true,
       message: "Product duplicated successfully",
-      data: duplicatedProduct,
+      data: "duplicatedProduct",
     });
   } catch (error: any) {
     next(new CustomError(500, error.message));

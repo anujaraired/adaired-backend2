@@ -11,11 +11,10 @@ const permissionModuleSchema = new Schema(
   }
 );
 
-permissionModuleSchema.pre("save", function (next) {
-  if (this.isModified("value")) {
+permissionModuleSchema.pre("save", function () {
+  if (this.isModified("value") && typeof this.value === "string") {
     this.value = this.value.toLowerCase();
   }
-  next();
 });
 
 const PermissionModule = mongoose.model<PermissionModuleType & Document>(

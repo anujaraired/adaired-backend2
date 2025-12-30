@@ -265,7 +265,9 @@ export const createInvoice = async (
   if (existingInvoice) {
     throw new CustomError(400, "Invoice already exists for this order.");
   }
-
+  if (!order.orderNumber) {
+    throw new CustomError(500, "Order number is missing");
+  }
   const invoiceNumber = generateInvoiceNumber(order.orderNumber);
   const dueDate = new Date();
   dueDate.setDate(dueDate.getDate() + 7); // Due in 7 days

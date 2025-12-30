@@ -5,11 +5,13 @@ const cleanCanonicalLink = (input: string): string => {
   if (!input) return "";
 
   // Handle base URL
-  if (input.startsWith(process.env.LIVE_DOMAIN || "")) {
+  const liveDomain = process.env.LIVE_DOMAIN;
+
+  if (liveDomain && input.startsWith(liveDomain)) {
     return input
-      .replace(process.env.LIVE_DOMAIN, "")
+      .replace(liveDomain, "")
       .replace(/^\/+/, "")
-      .replace(/\/+$/, ""); // Trim trailing slashes too
+      .replace(/\/+$/, "");
   }
 
   // Handle full URLs
@@ -23,9 +25,9 @@ const cleanCanonicalLink = (input: string): string => {
   }
   // Handle slugs directly
   return input
-    .split("/") 
-    .map((part) => slugify(part, { lower: true, strict: true })) 
-    .join("/"); 
+    .split("/")
+    .map((part) => slugify(part, { lower: true, strict: true }))
+    .join("/");
 };
 
 const seoSchema = new Schema({

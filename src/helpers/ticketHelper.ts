@@ -33,9 +33,9 @@ export const validateTicketPermissions = async (
       );
     }
   } else if (action === "message") {
-    const isParticipant = ticket.participants.some(
-      (p) => p.toString() === userId
-    );
+    const isParticipant =
+      ticket.participants?.some((p) => p.toString() === userId) ?? false;
+
     if (!isAdmin && !isAssigned && !isCustomer && !isParticipant) {
       throw new CustomError(
         403,

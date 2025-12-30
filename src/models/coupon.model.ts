@@ -30,7 +30,7 @@ const CouponSchema = new Schema<CouponTypes>(
       required: true,
       min: 0,
       validate: {
-        validator: function (value: number) {
+        validator: function (this: any, value: number) {
           if (this.discountType === "percentage") {
             return value <= 100;
           }
@@ -39,6 +39,7 @@ const CouponSchema = new Schema<CouponTypes>(
         message: "Percentage discount must be ≤ 100",
       },
     },
+
     minOrderAmount: {
       type: Number,
       default: 1,
@@ -110,24 +111,42 @@ const CouponSchema = new Schema<CouponTypes>(
 );
 
 // Universal validation (works for both create & update)
-CouponSchema.pre("save", function (next) {
+CouponSchema.pre("save", function () {
   // Validate productCategories
-  if (this.couponApplicableOn === "productCategories" && this.productCategories.length === 0) {
-    return next(new Error("At least one product category is required"));
+  if (
+    this.couponApplicableOn === "productCategories" &&
+    (!this.productCategories || this.productCategories.length === 0)
+  ) {
+    throw new Error("At least one product category is required");
   }
-  if (this.couponApplicableOn !== "productCategories" && this.productCategories.length > 0) {
-    return next(new Error("Product categories must be empty for non-category coupons"));
+
+  if (
+    this.couponApplicableOn !== "productCategories" &&
+    this.productCategories &&
+    this.productCategories.length > 0
+  ) {
+    throw new Error(
+      "Product categories must be empty for non-category coupons"
+    );
   }
 
   // Validate specificProducts
-  if (this.couponApplicableOn === "specificProducts" && this.specificProducts.length === 0) {
-    return next(new Error("At least one product is required"));
-  }
-  if (this.couponApplicableOn !== "specificProducts" && this.specificProducts.length > 0) {
-    return next(new Error("Specific products must be empty for non-product-specific coupons"));
+  if (
+    this.couponApplicableOn === "specificProducts" &&
+    (!this.specificProducts || this.specificProducts.length === 0)
+  ) {
+    throw new Error("At least one product is required");
   }
 
-  next();
+  if (
+    this.couponApplicableOn !== "specificProducts" &&
+    this.specificProducts &&
+    this.specificProducts.length > 0
+  ) {
+    throw new Error(
+      "Specific products must be empty for non-product-specific coupons"
+    );
+  }
 });
 
 CouponSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });

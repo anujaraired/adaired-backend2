@@ -185,7 +185,9 @@ export const applyCoupon = async (
   }
 
   // Check is coupon is already used to its limit
-  if (coupon.usedCount >= coupon.totalUsageLimit) {
+  const usedCount = coupon.usedCount ?? 0;
+  const totalUsageLimit = coupon.totalUsageLimit ?? 0;
+  if (usedCount >= totalUsageLimit) {
     throw new CustomError(
       400,
       `Coupon "${coupon.code}" has reached its usage limit`
@@ -198,15 +200,15 @@ export const applyCoupon = async (
   const userUsage = coupon.userUsage?.find(
     (u: any) => u.userId.toString() === userId
   );
-
-  if (userUsage && userUsage.usageCount >= coupon.usageLimitPerUser) {
+  const usageLimitPerUser = coupon.usageLimitPerUser ?? 0;
+  if (userUsage && userUsage.usageCount >= usageLimitPerUser) {
     throw new CustomError(
       400,
       `You've reached the usage limit for coupon "${coupon.code}"`
     );
   }
 
-  if (coupon.usedCount >= coupon.totalUsageLimit) {
+  if (usedCount >= usageLimitPerUser) {
     throw new CustomError(
       400,
       `Coupon "${coupon.code}" has reached its total usage limit`
@@ -279,7 +281,8 @@ export const recordCouponUsage = async (
       usageCount: 1,
     });
   }
-  coupon.usedCount += 1;
+  let usedCount = coupon.usedCount ?? 0;
+  usedCount += 1;
   await coupon.save();
 };
 
@@ -369,7 +372,10 @@ export const calculateCouponDiscount = async (
     }
 
     // Check is coupon is already used to its limit
-    if (coupon.usedCount >= coupon.totalUsageLimit) {
+    const usedCount = coupon.usedCount ?? 0;
+    const totalUsageLimit = coupon.totalUsageLimit ?? 0;
+
+    if (usedCount >= totalUsageLimit) {
       return next(
         new CustomError(
           400,

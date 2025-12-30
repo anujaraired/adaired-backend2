@@ -74,14 +74,13 @@ TicketSchema.statics.generateTicketId = async function () {
 };
 
 // Pre-save hook to set ticketId
-TicketSchema.pre("save", async function (next) {
-  if (!this.isNew || this.ticketId) return next();
+TicketSchema.pre("save", async function () {
+  if (!this.isNew || this.ticketId) return;
 
   try {
     this.ticketId = await (this.constructor as any).generateTicketId();
-    next();
-  } catch (err: any) {
-    next(err);
+  } catch (err) {
+    throw err;
   }
 });
 

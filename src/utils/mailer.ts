@@ -253,11 +253,15 @@ export const sendOrderConfirmationEmail = async (
     const number = order.orderNumber;
     const type = "order" as const;
     const greeting = `Hello ${user.name},`;
-    const date = new Date(order.createdAt).toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "2-digit",
-    });
+    const date = new Date(order.createdAt ?? Date.now()).toLocaleDateString(
+      "en-US",
+      {
+        month: "long",
+        day: "numeric",
+        year: "2-digit",
+      }
+    );
+
     const totalAmount = `$${order.finalPrice.toFixed(2)}`;
     const paymentStatus = order.paymentStatus;
     const linkUrl =
@@ -269,7 +273,7 @@ export const sendOrderConfirmationEmail = async (
 
     const html = emailTemplate(
       subject,
-      number,
+      number ?? "",
       type,
       greeting,
       date,
@@ -298,11 +302,16 @@ export const sendPaymentConfirmationEmail = async (
     const number = order.orderNumber;
     const type = "order" as const;
     const greeting = `Hello ${user.name},`;
-    const date = new Date(order.createdAt).toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "2-digit",
-    });
+
+    const date = new Date(order.createdAt ?? Date.now()).toLocaleDateString(
+      "en-US",
+      {
+        month: "long",
+        day: "numeric",
+        year: "2-digit",
+      }
+    );
+
     const totalAmount = `$${order.finalPrice.toFixed(2)}`;
     const paymentStatus = order.paymentStatus;
     const linkUrl = `${process.env.BHW_DASHBOARD_URI}/orders?orderId${order.orderNumber}`;
@@ -311,7 +320,7 @@ export const sendPaymentConfirmationEmail = async (
 
     const html = emailTemplate(
       subject,
-      number,
+      number ?? "",
       type,
       greeting,
       date,
@@ -339,11 +348,15 @@ export const sendAdminNewOrderEmail = async (
     const number = order.orderNumber;
     const type = "order" as const;
     const greeting = `Hello Admin Team,`;
-    const date = new Date(order.createdAt).toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "2-digit",
-    });
+    const date = new Date(order.createdAt ?? Date.now()).toLocaleDateString(
+      "en-US",
+      {
+        month: "long",
+        day: "numeric",
+        year: "2-digit",
+      }
+    );
+
     const totalAmount = `$${order.finalPrice.toFixed(2)}`;
     const paymentStatus = order.paymentStatus;
     const linkUrl = `${process.env.ADMIN_DASHBOARD_BASE_URI}/orders/order-details?orderNumber=${order.orderNumber}`;
@@ -352,7 +365,7 @@ export const sendAdminNewOrderEmail = async (
 
     const html = emailTemplate(
       subject,
-      number,
+      number ?? "",
       type,
       greeting,
       date,
@@ -384,11 +397,15 @@ export const sendAdminPaymentReceivedEmail = async (
     const number = order.orderNumber;
     const type = "order" as const;
     const greeting = `Hello Admin Team,`;
-    const date = new Date(order.createdAt).toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "2-digit",
-    });
+    const date = new Date(order.createdAt ?? Date.now()).toLocaleDateString(
+      "en-US",
+      {
+        month: "long",
+        day: "numeric",
+        year: "2-digit",
+      }
+    );
+
     const totalAmount = `$${order.finalPrice.toFixed(2)}`;
     const paymentStatus = order.paymentStatus;
     const linkUrl = `${process.env.ADMIN_DASHBOARD_BASE_URI}/orders/order-details?orderNumber=${order.orderNumber}`;
@@ -397,7 +414,7 @@ export const sendAdminPaymentReceivedEmail = async (
 
     const html = emailTemplate(
       subject,
-      number,
+      number ?? "",
       type,
       greeting,
       date,
@@ -513,4 +530,3 @@ export const sendAdminNewInvoiceEmail = async (
     console.error("Failed to send admin new invoice email:", error);
   }
 };
-

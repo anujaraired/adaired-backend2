@@ -22,15 +22,23 @@
     "multer": "^2.0.2",
     "nodemailer": "^7.0.12",
     "puppeteer": "^24.34.0",
+    "rate-limiter-flexible": "^9.0.1",
     "sanitize-html": "^2.17.0",
     "slugify": "^1.6.6",
     "stripe": "^20.1.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
     "@types/node": "^25.0.3",
+    "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^7.0.4",
+    "@types/sanitize-html": "^2.16.0",
+    "@types/socket.io": "^3.0.1",
+    "@types/uuid": "^10.0.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
   }

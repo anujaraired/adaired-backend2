@@ -1,7 +1,7 @@
 import Cart from "../models/cartModel";
 import Product from "../models/product.model";
 import Order from "../models/orderModel";
-import {checkPermission} from "../helpers/authHelper";
+import { checkPermission } from "../helpers/authHelper";
 import { NextFunction, Request, Response } from "express";
 import User from "../models/user.model";
 import { CustomError } from "../middlewares/error";
@@ -235,7 +235,7 @@ export const updateCart = async (
 
     // Find the specific product entry by its unique ID
     const productIndex = cart.products.findIndex(
-      (p) => p._id.toString() === cartItemId
+      (p) => p._id && p._id.toString() === cartItemId
     );
     if (productIndex === -1) {
       return next(new CustomError(404, "Product entry not found in cart."));
@@ -327,8 +327,9 @@ export const deleteProduct = async (
 
     // Find the product to remove
     const productIndex = cart.products.findIndex(
-      (p) => p._id.toString() === cartItemId.toString()
+      (p) => p._id && p._id.toString() === cartItemId.toString()
     );
+
     if (productIndex === -1) {
       return next(new CustomError(404, "Product entry not found in cart."));
     }
@@ -399,7 +400,7 @@ export const emptyCart = async (
       return next(new CustomError(404, "User not found"));
     }
 
-    user.cart = null;
+    user.cart = undefined;
 
     // Save the updated user
     await user.save();

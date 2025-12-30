@@ -31,11 +31,10 @@ const roleSchema = new Schema(
   }
 );
 
-roleSchema.pre('save', function(next) {
-  if (this.isModified('name')) {
+roleSchema.pre("save", function () {
+  if (this.isModified("name") && typeof this.name === "string") {
     this.name = this.name.toLowerCase();
   }
-  next();
 });
 
 const Role = mongoose.model<RoleTypes & Document>("Role", roleSchema);

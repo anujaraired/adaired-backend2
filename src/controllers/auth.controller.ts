@@ -87,7 +87,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
 
     if (userCount === 0) {
       user.isAdmin = true;
-      user.role = null;
+      user.role = undefined;
     } else {
       // Assign role: Use provided role or default to "Customer"
       let assignedRoleId = role;
@@ -238,7 +238,6 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
 
 //     // Validate user input
 //     if (!validateInput(req, res)) return;
-
 
 //     // Fetch user with password and role
 //     let user;
@@ -556,8 +555,11 @@ const resetPassword = async (
     if (userId) {
       // Logged-in user resetting password
       user = await User.findById(userId).select("+password");
-      if (!user) throw new CustomError(404, "User not found");
 
+      if (!user) throw new CustomError(404, "User not found");
+      if (!user.password) {
+        throw new CustomError(500, "User password not found");
+      }
       if (
         !currentPassword ||
         !(await bcrypt.compare(currentPassword, user.password))

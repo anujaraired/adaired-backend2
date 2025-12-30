@@ -2,7 +2,7 @@ import Service from "../models/serviceModel";
 import { NextFunction, Request, Response } from "express";
 import { CustomError } from "../middlewares/error";
 import slugify from "slugify";
-import {checkPermission} from "../helpers/authHelper";
+import { checkPermission } from "../helpers/authHelper";
 import { validationResult } from "express-validator";
 import { ServiceTypes } from "../types/serviceTypes";
 
@@ -239,6 +239,9 @@ const deleteService = async (
     const deletedService = await Service.findByIdAndDelete(id);
 
     // Remove service from parent's array
+    if (!deletedService) {
+      throw new CustomError(404, "Service not found");
+    }
     if (deletedService.parentService) {
       const parentService = await Service.findByIdAndUpdate(
         deletedService.parentService,

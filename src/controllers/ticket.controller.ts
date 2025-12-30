@@ -9,6 +9,7 @@ import { TicketStatus, TicketPriority } from "../types/ticket.types";
 import { checkPermission, getUserRoleType } from "../helpers/authHelper";
 import User from "../models/user.model";
 import { validateInput } from "../utils/validateInput";
+import { Types } from "mongoose";
 
 // Shared permission validator
 const validateTicketPermissions = async (
@@ -23,6 +24,9 @@ const validateTicketPermissions = async (
   const isAdmin = userType === "admin";
   const hasUpdatePermission = await checkPermission(userId, "tickets", 2);
   const isAssigned = ticket.assignedTo?.equals(userId);
+  if (!ticket.customer) {
+    throw new CustomError(400, "Ticket has no customer assigned");
+  }
   const isCustomer = ticket.customer.equals(userId);
 
   // Permission matrix
@@ -60,6 +64,8 @@ export const createTicket = async (
     if (!validateInput(req, res)) return;
 
     const { userId, body, files } = req;
+    const objectId =
+      typeof userId === "string" ? new Types.ObjectId(userId) : userId;
     const { subject, status, description, priority, customer, assignedTo } =
       body;
 
@@ -149,7 +155,7 @@ export const createTicket = async (
       customer: finalCustomer,
       messages: [
         {
-          sender: userId,
+          sender: objectId,
           message: description,
           attachments,
         },

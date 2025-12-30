@@ -290,7 +290,7 @@ export const stripeWebhook = async (req: Request, res: Response) => {
           await updateInvoicePaymentStatus(updatedOrder._id.toString(), "Paid");
 
           // Record coupon usage after successful payment
-          if (session.metadata.couponId) {
+          if (session.metadata && session.metadata.couponId) {
             await recordCouponUsage(
               new Types.ObjectId(session.metadata.couponId),
               session.metadata.userId
@@ -317,12 +317,56 @@ export const stripeWebhook = async (req: Request, res: Response) => {
         await updateInvoicePaymentStatus(updatedOrder._id.toString(), "Unpaid");
 
         // Create a new checkout session if expired
-        const cart = await Cart.findOne({
-          userId: expiredSession.metadata.userId,
-        });
+        const userId = expiredSession.metadata?.userId;
+
+        if (!userId) {
+          throw new CustomError(
+            400,
+            "User ID missing in Stripe session metadata"
+          );
+        }
+
+        const cart = await Cart.findOne({ userId });
+        // if (cart && cart.products.length > 0) {
+        //   const newSession = await stripe.checkout.sessions.create({
+        //     payment_method_types: ["card"],
+        //     line_items: cart.products.map((product: any) => ({
+        //       price_data: {
+        //         currency: "usd",
+        //         product_data: {
+        //           name: product.product.name,
+        //         },
+        //         unit_amount: Math.round(product.totalPrice * 100),
+        //       },
+        //       quantity: product.quantity,
+        //     })),
+        //     mode: "payment",
+        //     success_url: expiredSession.success_url,
+        //     cancel_url: expiredSession.cancel_url,
+        //     metadata: {
+        //       userId: expiredSession.metadata.userId,
+        //       couponId: expiredSession.metadata.couponId,
+        //     },
+        //   });
+
+        //   await Order.findOneAndUpdate(
+        //     { paymentId: expiredSession.id },
+        //     {
+        //       paymentUrl: newSession.url,
+        //       paymentId: newSession.id,
+        //     },
+        //     { new: true }
+        //   );
+        // }
+        const metadata = expiredSession.metadata;
+
+        if (!metadata?.userId) {
+          throw new CustomError(400, "Stripe session metadata missing userId");
+        }
+
+        const couponId = metadata.couponId;
         if (cart && cart.products.length > 0) {
           const newSession = await stripe.checkout.sessions.create({
-            payment_method_types: ["card"],
             line_items: cart.products.map((product: any) => ({
               price_data: {
                 currency: "usd",
@@ -334,11 +378,12 @@ export const stripeWebhook = async (req: Request, res: Response) => {
               quantity: product.quantity,
             })),
             mode: "payment",
-            success_url: expiredSession.success_url,
-            cancel_url: expiredSession.cancel_url,
+            success_url: expiredSession.success_url!,
+            cancel_url: expiredSession.cancel_url!,
+
             metadata: {
-              userId: expiredSession.metadata.userId,
-              couponId: expiredSession.metadata.couponId,
+              userId,
+              ...(couponId && { couponId }),
             },
           });
 
@@ -442,8 +487,7 @@ export const updateOrder = async (
       return res.status(403).json({ message: "Permission denied" });
     }
 
-    if (updateData.paymentStatus) {
-      // Update invoice payment status
+    if (updateData.paymentStatus && orderId) {
       await updateInvoicePaymentStatus(
         orderId.toString(),
         updateData.paymentStatus
@@ -494,6 +538,9 @@ export const deleteOrder = async (
     }
 
     // Delete associated invoice
+    if (!orderId) {
+      throw new CustomError(400, "Order ID is required to delete invoice");
+    }
     await deleteInvoiceByOrderId(orderId.toString());
 
     res
@@ -877,9 +924,12 @@ export const getSalesReport = async (
 
     // Aggregate orders by month
     orders.forEach((order) => {
-      const month = new Date(order.createdAt).toLocaleString("en-US", {
+      if (!order.createdAt) return;
+
+      const month = order.createdAt.toLocaleString("en-US", {
         month: "short",
       });
+
       monthlyData[month].sales += order.totalPrice;
       monthlyData[month].revenue += order.finalPrice;
     });
